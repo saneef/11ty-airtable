@@ -1,0 +1,18 @@
+---
+title: Products
+layout: base-layout.njk
+---
+
+<h1>Products</h1>
+
+<ul class="products-list auto-grid" role="list">
+  {% for item in products %}
+    <li class="product-card">
+        {% for picture in item.Photos %}
+        {{ picture | safe }}
+        {% endfor %}
+        <h2>{{ item.Title }}</h2>
+        <p>{{ item.Description }}</p>
+    </li>
+  {% endfor %}
+</ul>

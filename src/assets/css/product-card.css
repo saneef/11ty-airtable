@@ -1,0 +1,15 @@
+.product-card picture,
+.product-card img {
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  height: auto;
+}
+
+.product-card h2 {
+  margin-block-start: 0.5rem;
+}
+
+.product-card p {
+  margin-block-start: 0;
+}

@@ -1,0 +1,8 @@
+:root {
+  --font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, "DejaVu Sans",
+    source-sans-pro, sans-serif;
+}
+
+html {
+  font-family: var(--font-family);
+}
