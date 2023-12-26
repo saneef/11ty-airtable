@@ -59,19 +59,13 @@ async function getProductsData() {
   return fields;
 }
 
-module.exports = async function () {
-  const productsCache = new AssetCache("airtable-products");
-
-  if (productsCache.isCacheValid(CACHE_DURATION)) {
-    return productsCache.getCachedValue(); // This returns a promise
-  }
-
-  console.log("Cache expired. Fetching data from Airtable");
-
-  let products = await getProductsData();
-
-  products = await Promise.all(
+async function processRemoteImages(products) {
+  // Using Promise.all to wait until all product objects
+  // are processed.
+  return Promise.all(
     products.map(async (p) => {
+      // Using Promise.all again to wait until all image URLs
+      // are processed.
       const photos = await Promise.all(
         p.Photos.map(async (url) => {
           const metadata = await Image(url, {
@@ -90,6 +84,10 @@ module.exports = async function () {
           // Elevent Image's generateHTML utility function
           return Image.generateHTML(metadata, {
             alt: `Thumbnail for ${p.Title}`,
+
+            // Once, you finalise the design of the page,
+            // Use https://ausi.github.io/respimagelint/
+            // to determine optimum 'sizes' attribute
             sizes: "100w",
           });
         }),
@@ -101,6 +99,20 @@ module.exports = async function () {
       };
     }),
   );
+}
+
+module.exports = async function () {
+  const productsCache = new AssetCache("airtable-products");
+
+  if (productsCache.isCacheValid(CACHE_DURATION)) {
+    return productsCache.getCachedValue(); // This returns a promise
+  }
+
+  console.log("Cache expired. Fetching data from Airtable");
+
+  let products = await getProductsData();
+
+  products = await processRemoteImages(products);
 
   await productsCache.save(products, "json");
 
