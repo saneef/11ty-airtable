@@ -64,38 +64,35 @@ async function processRemoteImages(products) {
   // are processed.
   return Promise.all(
     products.map(async (p) => {
-      // Using Promise.all again to wait until all image URLs
-      // are processed.
-      const photos = await Promise.all(
-        p.Photos.map(async (url) => {
-          const metadata = await Image(url, {
-            widths: [800, 600, 400],
-            urlPath: IMAGES_URL_PATH,
-            outputDir: IMAGES_OUTPUT_DIR,
-            formats: ["webp", "jpeg"],
-            cacheOptions: {
-              duration: CACHE_DURATION,
-            },
-          });
+      // Picking the first photo from the array
+      const url = p.Photos[0];
 
-          // Here you could return metadata object and manually
-          // populate <img> or <picture> elements in Nunjucks template.
-          // But, I'm taking a shortcut by generating <picture> element using
-          // Elevent Image's generateHTML utility function
-          return Image.generateHTML(metadata, {
-            alt: `Thumbnail for ${p.Title}`,
+      const metadata = await Image(url, {
+        widths: [800, 600, 400],
+        urlPath: IMAGES_URL_PATH,
+        outputDir: IMAGES_OUTPUT_DIR,
+        formats: ["webp", "jpeg"],
+        cacheOptions: {
+          duration: CACHE_DURATION,
+        },
+      });
 
-            // Once, you finalise the design of the page,
-            // Use https://ausi.github.io/respimagelint/
-            // to determine optimum 'sizes' attribute
-            sizes: "100w",
-          });
-        }),
-      );
+      const pictureElement = Image.generateHTML(metadata, {
+        alt: `Thumbnail for ${p.Title}`,
+
+        // Once, you finalise the design of the page,
+        // Use https://ausi.github.io/respimagelint/
+        // to determine optimum 'sizes' attribute
+        sizes: "100w",
+      });
+
+      // This is to remove 'Photos' properties
+      // from the object without mutating
+      const { Photos, ...restOfProduct } = p;
 
       return {
-        ...p,
-        Photos: photos,
+        ...restOfProduct,
+        pictureElement,
       };
     }),
   );
